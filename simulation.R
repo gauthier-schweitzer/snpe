@@ -1,23 +1,26 @@
+library(mvtnorm)
+#library(Hmisc)
+
+# Definition des parametres -----------------------------------------------
+sigma_mat = matrix(c(0.6, rho, rho, 1), nrow=2, ncol=2, byrow = TRUE) # Matrice de var-cov des erreurs
+beta = 0.2 # Effet traitement sur salaire
+gamma = 0.2 # Effet traitement sur employabilite 
+pi = matrix (c(9.5,0.25), nrow = 1, ncol = 2) # Constantes pour les 2 eq
+p = 0.5  # Proportion de l'echantillon traitee
 
 # Simulations -------------------------------------------------------------
 # On veut constituer un echantillon de taille N
-N = 10000
+N = 100000
+set.seed(123)
 
 # On commence par simuler les erreurs
-library(mvtnorm)
-sigma_mat = matrix(c(1, 0.5, 0.5, 1), nrow=2, ncol=2, byrow = TRUE)
 UV = rmvnorm(n = N, mean = c(0,0), sigma = sigma_mat)
 
-# On simule X
+# On simule X, constante et propensity score
 X = matrix(data = 1, nrow = N, ncol = 1)
-
-# On definit ensuite les constantes de nos variables latentes
-beta = 3
-gamma = 0.2
-pi = matrix (c(1,0.25), nrow = 1, ncol = 2)
+X[,2] = rnorm(n = N, mean = 0, sd = 1)
 
 # On assigne les indiv a un groupe de traitement (proportion p) et de controle (1-p)
-p = 0.5
 D = rbinom(n = N, size = 1, prob = p)
 
 # On introduit les variables latentes et l'observee
@@ -25,11 +28,13 @@ Y_hat = D*beta + X*pi[1,1] + UV[,1]
 Z_hat = D*gamma + X*pi[1,2] + UV[,2]
 Y = 0 + (Z_hat>=0)*Y_hat
 
-# On verifie en comparant les taux de chomage dans les deux groupes
+# On verifie en comparant les taux de chomage et salaires dans les deux groupes
 # Chez les non traites
 sum((Y == 0)&(D == 0))/length(D ==0)
+summary(exp(Y[(Y>0)&(D==1)]))
 # Chez les traites
 sum((Y == 0)&(D == 1))/length(D ==1)
+summary(exp(Y[(Y>0)&(D==0)]))
 
 
 # Estimation --------------------------------------------------------------
