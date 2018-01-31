@@ -175,4 +175,3 @@ lb_final # lower bound
 ub_final # upper bound
 ic_lb_final # lower bound de l'ic de la lower bound
 ic_ub_final # upper bound de l'ic de la upper bound
-
